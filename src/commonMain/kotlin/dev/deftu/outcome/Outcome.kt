@@ -300,14 +300,14 @@ public sealed interface Outcome<out T, out E> {
     public fun unwrap(): T {
         return when (this) {
             is Success -> this.value
-            is Failure -> throw IllegalStateException("Tried to unwrap a Failure(${this.error})")
+            is Failure -> throw IllegalUnwrapException("Tried to unwrap a Failure(${this.error})")
         }
     }
 
     public fun expect(message: String): T {
         return when (this) {
             is Success -> this.value
-            is Failure -> throw IllegalStateException("$message: ${this.error}")
+            is Failure -> throw IllegalUnwrapException("$message: ${this.error}")
         }
     }
 
