@@ -33,24 +33,6 @@ public sealed interface Outcome<out T, out E> {
         }
 
         @JvmStatic
-        public suspend fun <T> attemptSuspend(block: suspend () -> T): Outcome<T, Throwable> {
-            return try {
-                success(block())
-            } catch (e: Throwable) {
-                failure(e)
-            }
-        }
-
-        @JvmStatic
-        public suspend fun <T, E> attemptSuspend(converter: (Throwable) -> E, block: suspend () -> T): Outcome<T, E> {
-            return try {
-                success(block())
-            } catch (e: Throwable) {
-                failure(converter(e))
-            }
-        }
-
-        @JvmStatic
         public fun <T, E> nullable(value: T?, onNull: () -> E): Outcome<T, E> {
             return if (value != null) {
                 success(value)

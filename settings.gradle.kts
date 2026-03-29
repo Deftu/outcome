@@ -22,7 +22,22 @@ pluginManagement {
 }
 
 plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version ("0.8.+")
+    id("org.gradle.toolchains.foojay-resolver-convention") version("1.0.0")
 }
 
-rootProject.name = extra["project.name"]?.toString() ?: throw MissingPropertyException("The project name was not configured!")
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
+val projectName = extra["project.name"]?.toString() ?: throw MissingPropertyException("The project name was not configured!")
+rootProject.name = projectName
+
+listOf(
+    "core",
+    "coroutines",
+    "test",
+    "slf4j",
+    "ktor-client",
+    "ktor-server",
+).forEach { module ->
+    file("$projectName-$module").takeIf { !it.exists() }?.mkdirs()
+    include(":$projectName-$module")
+}
