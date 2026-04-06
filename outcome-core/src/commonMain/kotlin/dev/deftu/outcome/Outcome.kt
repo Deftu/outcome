@@ -258,25 +258,20 @@ public sealed interface Outcome<out T, out E> {
         }
     }
 
-    public fun touchValue(action: Callback<@UnsafeVariance T>): Outcome<T, E> {
-        return when (this) {
-            is Success -> {
-                action(this.value)
-                this
-            }
-
-            is Failure -> this
+    public fun onSuccess(action: Callback<@UnsafeVariance T>): Outcome<T, E> {
+        if (this is Success) {
+            action(this.value)
         }
+
+        return this
     }
 
-    public fun touchError(action: Callback<@UnsafeVariance E>): Outcome<T, E> {
-        return when (this) {
-            is Success -> this
-            is Failure -> {
-                action(this.error)
-                this
-            }
+    public fun onFailure(action: Callback<@UnsafeVariance E>): Outcome<T, E> {
+        if (this is Failure) {
+            action(this.error)
         }
+
+        return this
     }
 
     public fun unwrap(): T {

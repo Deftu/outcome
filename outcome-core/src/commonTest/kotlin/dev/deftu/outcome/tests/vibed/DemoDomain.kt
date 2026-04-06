@@ -45,8 +45,8 @@ internal object DemoDomain {
                 predicate = { it.port in 1..65535 },
                 onFailure = { "Port out of range: ${it.port}" }
             )
-            .touchValue { println("[assembleServiceProps] OK=$it") }
-            .touchError { println("[assembleServiceProps] ERR=$it") }
+            .onSuccess { println("[assembleServiceProps] OK=$it") }
+            .onFailure { println("[assembleServiceProps] ERR=$it") }
     }
 
     fun openSocketLike(host: String, port: Int): Outcome<String, String> {

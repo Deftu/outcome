@@ -9,14 +9,14 @@ class FeatureFlag_Gates_Test {
     private fun isRegionAllowed(region: String): Outcome<Boolean, String> {
         val allowed = setOf("eu", "na", "za")
         return Outcome.bool(region.lowercase() in allowed) { "region not allowed: $region" }
-            .touchValue { println("[gate:region] pass=$region") }
-            .touchError { println("[gate:region] fail=$it") }
+            .onSuccess { println("[gate:region] pass=$region") }
+            .onFailure { println("[gate:region] fail=$it") }
     }
 
     private fun isUserAgeOk(age: Int): Outcome<Boolean, String> {
         return Outcome.bool(age >= 16) { "too young: $age" }
-            .touchValue { println("[gate:age] pass=$age") }
-            .touchError { println("[gate:age] fail=$it") }
+            .onSuccess { println("[gate:age] pass=$age") }
+            .onFailure { println("[gate:age] fail=$it") }
     }
 
     @Test

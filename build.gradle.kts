@@ -1,6 +1,8 @@
+import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 plugins {
@@ -13,8 +15,17 @@ plugins {
     id("dev.deftu.gradle.tools.publishing.maven") version(dgtVersion) apply(false)
 }
 
+val projectName = projectData.name
+
 subprojects {
-    if (project.name == "outcome-slf4j") {
+    if (project.name.removePrefix("$projectName-") !in listOf(
+        "core",
+        "coroutines",
+        "test",
+        "retry",
+        "ktor-client",
+        "ktor-server",
+    )) {
         return@subprojects
     }
 
@@ -92,6 +103,35 @@ subprojects {
                 implementation(kotlin("test-junit"))
             }
         }
+    }
+
+    configure<JavaPluginExtension> {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(8))
+        }
+    }
+}
+
+subprojects {
+    if (project.name.removePrefix("$projectName-") !in listOf(
+        "slf4j",
+        "jda-ktx",
+        "jda-akuma",
+    )) {
+        return@subprojects
+    }
+
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "dev.deftu.gradle.tools")
+    apply(plugin = "dev.deftu.gradle.tools.publishing.maven")
+
+    dependencies {
+        "implementation"(project(":$projectName-core"))
+        "implementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    }
+
+    configure<KotlinJvmProjectExtension> {
+        explicitApi()
     }
 
     configure<JavaPluginExtension> {

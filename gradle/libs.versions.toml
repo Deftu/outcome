@@ -1,8 +1,14 @@
 [versions]
 ktor = "3.4.1"
 slf4j = "2.0.12"
+jda-core = "6.3.2"
+jda-ktx = "0.14.2"
+jda-akuma = "0.9.0"
 
 [libraries]
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-server-core = { group = "io.ktor", name = "ktor-server-core", version.ref = "ktor" }
 slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+jda-core = { group = "net.dv8tion", name = "JDA", version.ref = "jda-core" }
+jda-ktx = { group = "club.minnced", name = "jda-ktx", version.ref = "jda-ktx" }
+jda-akuma = { group = "dev.deftu", name = "akuma", version.ref = "jda-akuma" }

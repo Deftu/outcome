@@ -21,8 +21,8 @@ class Batch_UserImport_Test {
                 onFailure = { (id, name) -> "blank field(s): id='$id' name='$name'" }
             )
             .mapValue { (id, name) -> User(id, name) }
-            .touchValue { println("[validate] OK=$it") }
-            .touchError { println("[validate] ERR=$it raw=$raw") }
+            .onSuccess { println("[validate] OK=$it") }
+            .onFailure { println("[validate] ERR=$it raw=$raw") }
     }
 
     @Test

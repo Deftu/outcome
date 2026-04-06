@@ -34,9 +34,12 @@ listOf(
     "core",
     "coroutines",
     "test",
+    "retry",
     "slf4j",
     "ktor-client",
     "ktor-server",
+    "jda-ktx",
+    "jda-akuma",
 ).forEach { module ->
     file("$projectName-$module").takeIf { !it.exists() }?.mkdirs()
     include(":$projectName-$module")

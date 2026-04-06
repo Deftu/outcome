@@ -8,15 +8,22 @@ import io.ktor.client.call.body
 import io.ktor.client.request.*
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.isSuccess
+import io.ktor.utils.io.CancellationException
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.jvm.JvmName
 
-/**
- * Executes a Ktor Client request safely, catching network exceptions and mapping HTTP errors.
- */
+@OptIn(ExperimentalContracts::class)
 public suspend inline fun <reified T, E> HttpClient.requestOutcome(
     crossinline requestBuilder: HttpRequestBuilder.() -> Unit,
     crossinline errorMapper: suspend (Throwable?, HttpResponse?) -> E
 ): Outcome<T, E> {
+    contract {
+        callsInPlace(requestBuilder, InvocationKind.UNKNOWN)
+        callsInPlace(errorMapper, InvocationKind.AT_MOST_ONCE)
+    }
+
     return try {
         val response = request(requestBuilder)
         if (response.status.isSuccess()) {
@@ -24,8 +31,9 @@ public suspend inline fun <reified T, E> HttpClient.requestOutcome(
         } else {
             Outcome.failure(errorMapper(null, response))
         }
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Throwable) {
-        // Network failure, timeout, or serialization error
         Outcome.failure(errorMapper(e, null))
     }
 }

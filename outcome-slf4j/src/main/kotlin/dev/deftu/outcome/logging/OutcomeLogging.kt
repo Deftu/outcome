@@ -3,58 +3,80 @@
 package dev.deftu.outcome.logging
 
 import dev.deftu.outcome.Outcome
+import dev.deftu.outcome.isFailure
+import dev.deftu.outcome.isSuccess
 import org.slf4j.Logger
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.jvm.JvmName
 
 public enum class LogLevel {
     TRACE, DEBUG, INFO, WARN, ERROR
 }
 
-/**
- * Logs the error if the Outcome is a Failure, then returns the unmodified Outcome.
- * * @param logger The SLF4J Logger instance.
- * @param level The severity level to log at (default is ERROR).
- * @param cause An optional Throwable to pass to the logger for stack traces.
- * @param message A lambda that generates the log message from the error.
- */
+@OptIn(ExperimentalContracts::class)
 public inline fun <T, E> Outcome<T, E>.logFailure(
     logger: Logger,
     level: LogLevel = LogLevel.ERROR,
     cause: Throwable? = null,
-    crossinline message: (E) -> String
+    message: (E) -> String
 ): Outcome<T, E> {
-    if (this is Outcome.Failure) {
-        val msg = message(this.error)
-        when (level) {
-            LogLevel.TRACE -> if (logger.isTraceEnabled) logger.trace(msg, cause)
-            LogLevel.DEBUG -> if (logger.isDebugEnabled) logger.debug(msg, cause)
-            LogLevel.INFO -> if (logger.isInfoEnabled) logger.info(msg, cause)
-            LogLevel.WARN -> if (logger.isWarnEnabled) logger.warn(msg, cause)
-            LogLevel.ERROR -> if (logger.isErrorEnabled) logger.error(msg, cause)
+    contract {
+        callsInPlace(message, InvocationKind.AT_MOST_ONCE)
+    }
+
+    if (this.isFailure()) {
+        val isEnabled = when (level) {
+            LogLevel.TRACE -> logger.isTraceEnabled
+            LogLevel.DEBUG -> logger.isDebugEnabled
+            LogLevel.INFO -> logger.isInfoEnabled
+            LogLevel.WARN -> logger.isWarnEnabled
+            LogLevel.ERROR -> logger.isErrorEnabled
+        }
+
+        if (isEnabled) {
+            val msg = message(this.error)
+            when (level) {
+                LogLevel.TRACE -> logger.trace(msg, cause)
+                LogLevel.DEBUG -> logger.debug(msg, cause)
+                LogLevel.INFO -> logger.info(msg, cause)
+                LogLevel.WARN -> logger.warn(msg, cause)
+                LogLevel.ERROR -> logger.error(msg, cause)
+            }
         }
     }
     return this
 }
 
-/**
- * Logs the value if the Outcome is a Success, then returns the unmodified Outcome.
- * * @param logger The SLF4J Logger instance.
- * @param level The severity level to log at (default is DEBUG).
- * @param message A lambda that generates the log message from the value.
- */
+@OptIn(ExperimentalContracts::class)
 public inline fun <T, E> Outcome<T, E>.logSuccess(
     logger: Logger,
     level: LogLevel = LogLevel.DEBUG,
-    crossinline message: (T) -> String
+    message: (T) -> String
 ): Outcome<T, E> {
-    if (this is Outcome.Success) {
-        val msg = message(this.value)
-        when (level) {
-            LogLevel.TRACE -> if (logger.isTraceEnabled) logger.trace(msg)
-            LogLevel.DEBUG -> if (logger.isDebugEnabled) logger.debug(msg)
-            LogLevel.INFO -> if (logger.isInfoEnabled) logger.info(msg)
-            LogLevel.WARN -> if (logger.isWarnEnabled) logger.warn(msg)
-            LogLevel.ERROR -> if (logger.isErrorEnabled) logger.error(msg)
+    contract {
+        callsInPlace(message, InvocationKind.AT_MOST_ONCE)
+    }
+
+    if (this.isSuccess()) {
+        val isEnabled = when (level) {
+            LogLevel.TRACE -> logger.isTraceEnabled
+            LogLevel.DEBUG -> logger.isDebugEnabled
+            LogLevel.INFO -> logger.isInfoEnabled
+            LogLevel.WARN -> logger.isWarnEnabled
+            LogLevel.ERROR -> logger.isErrorEnabled
+        }
+
+        if (isEnabled) {
+            val msg = message(this.value)
+            when (level) {
+                LogLevel.TRACE -> logger.trace(msg)
+                LogLevel.DEBUG -> logger.debug(msg)
+                LogLevel.INFO -> logger.info(msg)
+                LogLevel.WARN -> logger.warn(msg)
+                LogLevel.ERROR -> logger.error(msg)
+            }
         }
     }
     return this
